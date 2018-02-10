@@ -2,3 +2,5 @@
 *.pyc
 consts2.py
 *.pkl
+secrets.py
+tags

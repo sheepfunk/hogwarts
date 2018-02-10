@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 import points_util
 import cup_image
 from consts import HOUSES, SLACK_TOKEN, PREFECTS, ANNOUNCERS, CHANNEL, POINTS_FILE
@@ -21,9 +22,6 @@ class PointCounter(object):
                  announcers=ANNOUNCERS, points_file=POINTS_FILE):
         try:
             self.points = pickle.load(open(points_file, 'rb'))
-            if "Gryffendor" in self.points:
-                self.points["Gryffindor"] = self.points["Gryffendor"]
-                del self.points["Gryffendor"]
         except:
             self.points = Counter()
         self.prefects = prefects
@@ -75,14 +73,19 @@ def main():
     sc = SlackClient(SLACK_TOKEN)
     p = PointCounter()
     if sc.rtm_connect():
+        sc.api_call(
+            "chat.postMessage", channel=CHANNEL, username="Hogwarts bot",
+            text="I'm alive!")
         while True:
             messages = sc.rtm_read()
             for message in messages:
+                print("Message: %s" % message)
                 if is_hogwarts_related(message):
-                    print 'is_hogwarts_related'
+                    print('is_hogwarts_related')
                     for m in p.award_points(message['text'], message['user']):
                         sc.api_call(
-                            "chat.postMessage", channel=CHANNEL, text=m)
+                            "chat.postMessage", channel=CHANNEL,
+                            username="Hogwarts bot", text=m)
                     os.system(
                         "curl -F file=@%s -F title=%s -F channels=%s -F token=%s https://slack.com/api/files.upload"
                          % (cup_image.image_for_scores(p.points), '"House Points"', CHANNEL, SLACK_TOKEN))
@@ -90,7 +93,7 @@ def main():
 
                 time.sleep(1)
     else:
-        print "Connection Failed, invalid token?"
+        print("Connection Failed, invalid token?")
 
 
 if __name__ == "__main__":
