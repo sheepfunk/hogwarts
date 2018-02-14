@@ -4,9 +4,10 @@ import cup_image
 from consts import HOUSES, SLACK_TOKEN, PREFECTS, ANNOUNCERS, CHANNEL, POINTS_FILE
 
 from collections import Counter
+import google.cloud.storage
+import json
 import os
 import re
-import pickle
 from slackclient import SlackClient
 import time
 
@@ -17,16 +18,34 @@ nth = {
     4: "fourth"
 }
 
+BUCKET_NAME = "ka_users"
+STORAGE_CLIENT = google.cloud.storage.Client()
+BUCKET = STORAGE_CLIENT.get_bucket(BUCKET_NAME)
+
+
 class PointCounter(object):
     def __init__(self, prefects=PREFECTS,
                  announcers=ANNOUNCERS, points_file=POINTS_FILE):
         try:
-            self.points = pickle.load(open(points_file, 'rb'))
-        except:
+            self.points = Counter(json.loads(
+                BUCKET.get_blob(POINTS_FILE).download_as_string()))
+        except Exception as e:
+            print("Exception reading points file!\n%s" % e)
             self.points = Counter()
         self.prefects = prefects
         self.announcers = announcers
         self.points_file = points_file
+        self.points_dirty = False
+
+    def post_update(self):
+        if self.points_dirty:
+            self.points_dirty = False
+            try:
+                BUCKET.blob(self.points_file).upload_from_string(
+                    json.dumps(self.points), client=STORAGE_CLIENT)
+            except Exception as e:
+                print("Exception writing points file!\n%s" % e)
+                pass
 
     def get_points_from(self, message, awarder):
         amount = points_util.detect_points(message)
@@ -50,7 +69,7 @@ class PointCounter(object):
         if points and houses:
             for house in houses:
                 self.points[house] += points
-                pickle.dump(self.points, open(self.points_file, 'wb'))
+                self.points_dirty = True
                 messages.append(self.message_for(house, points))
         return messages
 
@@ -92,6 +111,7 @@ def main():
 
 
                 time.sleep(1)
+                p.post_update()
     else:
         print("Connection Failed, invalid token?")
 

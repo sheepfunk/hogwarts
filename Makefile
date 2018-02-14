@@ -3,7 +3,7 @@ EMPTY:
 create-secret:
 	-kubectl --namespace=hogwarts-bot delete secret hogwarts-secrets
 	kubectl --namespace=hogwarts-bot create secret generic hogwarts-secrets \
-	  --from-file=./secrets.py
+	  --from-file=./secrets.py --from-file=./hogwarts-bot-credentials.json
 
 create-namespace:
 	kubectl create -f ./namespace.yaml

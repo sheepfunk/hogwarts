@@ -4,3 +4,4 @@ consts2.py
 *.pkl
 secrets.py
 tags
+hogwarts-bot-credentials.json
