@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: hogwarts-bot
@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: bot
-        image: hogwarts-bot
-        imagePullPolicy: Never
+        image: gcr.io/khan-internal-services/hogwarts-bot
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: secrets
           mountPath: "/app/secrets"
