@@ -1,25 +1,26 @@
 from consts import HOUSES, IMAGE_PATH
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
-BAR_WIDTH = 103.5
-BAR_BOTTOM = 947
-BAR_HEIGHT = 650
 
-BAR_X = {
-    "Gryffindor": 306,
-    "Hufflepuff": 551,
-    "Slytherin": 806,
-    "Ravenclaw": 1043,
+# Tuples of (x1, y1, x2, y2)
+BAR_RECTS = {
+    "Gryffindor": (62, 70, 204, 513),
+    "Hufflepuff": (418, 70, 560, 513),
+    "Slytherin": (596, 70, 738, 513),
+    "Ravenclaw": (240, 70, 382, 513),
 }
 
-BAR_COLOR = {
-    "Gryffindor": "#ff0000",
-    "Ravenclaw": "#0000ff",
-    "Hufflepuff": "#ffff00",
-    "Slytherin": "#00ff00",
-}
+# Space below the bottom of the bar to superimpose the scores in text form
+BAR_SPACE = 10
 
+# Tuples of (background, fill)
+BAR_COLORS = {
+    "Gryffindor": ("#fef9ec", "#de5647"),
+    "Ravenclaw": ("#f3f9fc", "#0a8bc9"),
+    "Hufflepuff": ("#fef9ec", "#f5bf45"),
+    "Slytherin": ("#f0efee", "#2c9959"),
+}
 
 def calculate_scales(house_points):
     total_points = float(sum(house_points.values())) or 1.0
@@ -28,29 +29,49 @@ def calculate_scales(house_points):
 
 def draw_bar_for_house(im, house, scale):
     draw = ImageDraw.Draw(im)
-    draw.rectangle((BAR_X[house], BAR_BOTTOM,
-                     BAR_X[house] + BAR_WIDTH, BAR_BOTTOM - scale * BAR_HEIGHT),
-                    fill=BAR_COLOR[house])
-    draw.ellipse((BAR_X[house], BAR_BOTTOM - 50, BAR_X[house] + BAR_WIDTH, BAR_BOTTOM + 50), fill=BAR_COLOR[house])
+
+    # Background rectangle
+    draw.rectangle(BAR_RECTS[house], fill=BAR_COLORS[house][0])
+    bar_y = BAR_RECTS[house][3] * (1-scale) + BAR_RECTS[house][1] * scale
+
+    # Fill rectangle
+    draw.rectangle((BAR_RECTS[house][0], bar_y,
+                    BAR_RECTS[house][2], BAR_RECTS[house][3]),
+                   fill=BAR_COLORS[house][1])
+
     del draw
 
 
-def image_for_scores(scores, upload=True):
+def image_for_scores(scores):
     """Generate a sweet house cup image
    Arguments: a dictionary with house names as keys and scores as values
-   Returns: an imgur link to a house cup image representing the
+   Returns: filename containing a house cup image representing the
    scores
     """
     scaled = calculate_scales(scores)
-    points_image = Image.open(IMAGE_PATH)
+
+    overlay = Image.open(IMAGE_PATH)
+
+    bars = Image.new(overlay.mode, overlay.size)
     for house in HOUSES:
-        draw_bar_for_house(points_image, house, scaled[house])
+        draw_bar_for_house(bars, house, scaled[house])
+
+    merged = Image.alpha_composite(bars, overlay)
+
+    font = ImageFont.truetype('BrandonText-Black.otf', 32)
+    draw = ImageDraw.Draw(merged)
+    for house in HOUSES:
+        text = "%d" % scores[house]
+        w, _ = font.getsize(text)
+        draw.text(
+            ((BAR_RECTS[house][0] + BAR_RECTS[house][2] - w) * 0.5,
+             BAR_RECTS[house][3] + BAR_SPACE),
+            text,
+            fill=BAR_COLORS[house][1], font=font)
 
     outfile = str(abs(hash(str(scores)))) + '.png'
-    points_image.save(outfile, "PNG")
-    del points_image
+    merged.save(outfile, "PNG")
+    del overlay
+    del bars
+    del merged
     return outfile
-
-
-if __name__=="__main__":
-    image_for_scores(BAR_X, upload=False)
