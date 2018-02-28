@@ -16,7 +16,11 @@ spec:
       containers:
       - name: bot
         image: gcr.io/khan-internal-services/hogwarts-bot
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "1"
+            memory: 1Gi
         volumeMounts:
         - name: secrets
           mountPath: "/app/secrets"
