@@ -10,8 +10,8 @@ create-namespace:
 
 build: EMPTY
 	docker build -t hogwarts-bot .
-	docker tag hogwarts-bot gcr.io/khan-internal-services/hogwarts-bot
-	gcloud docker -- push gcr.io/khan-internal-services/hogwarts-bot
+	docker tag hogwarts-bot sheepfunk/hogwarts-bot
+	gcloud docker -- push sheepfunk/hogwarts-bot
 
 run: build
 	kubectl create -f ./deployment.yaml

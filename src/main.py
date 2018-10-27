@@ -18,7 +18,7 @@ nth = {
     4: "fourth"
 }
 
-BUCKET_NAME = "ka_users"
+BUCKET_NAME = "hogwarts_one"
 STORAGE_CLIENT = google.cloud.storage.Client()
 BUCKET = STORAGE_CLIENT.get_bucket(BUCKET_NAME)
 
