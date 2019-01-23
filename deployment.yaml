@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: bot
-        image: sheepfunk/hogwarts-bot
+        image: sheepfunk/hogwarts-bot:latest
         imagePullPolicy: Always
         resources:
           requests:

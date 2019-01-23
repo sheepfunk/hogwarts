@@ -5,10 +5,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Tuples of (x1, y1, x2, y2)
 BAR_RECTS = {
-    "Gryffindor": (62, 70, 204, 513),
-    "Hufflepuff": (418, 70, 560, 513),
-    "Slytherin": (596, 70, 738, 513),
-    "Ravenclaw": (240, 70, 382, 513),
+    "Dark": (62, 70, 204, 513),
+    "Light": (240, 70, 382, 513),
 }
 
 # Space below the bottom of the bar to superimpose the scores in text form
@@ -16,10 +14,8 @@ BAR_SPACE = 10
 
 # Tuples of (background, fill)
 BAR_COLORS = {
-    "Gryffindor": ("#fef9ec", "#de5647"),
-    "Ravenclaw": ("#f3f9fc", "#0a8bc9"),
-    "Hufflepuff": ("#fef9ec", "#f5bf45"),
-    "Slytherin": ("#f0efee", "#2c9959"),
+    "Light": ("#000000", "#0a8bc9"),
+    "Dark": ("#000000", "#de5647"),
 }
 
 def calculate_scales(house_points):

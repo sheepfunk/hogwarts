@@ -85,7 +85,7 @@ def is_hogwarts_related(message):
         message.get("channel", '') == CHANNEL and
         "text" in message and
         "user" in message and
-        "point" in message["text"] and
+        "newton" in message["text"] and
         points_util.get_houses_from(message["text"]))
 
 def main():
@@ -93,18 +93,18 @@ def main():
     p = PointCounter()
     if sc.rtm_connect():
         sc.api_call(
-            "chat.postMessage", channel=CHANNEL, username="Hogwarts bot",
-            text="I'm alive!")
+            "chat.postMessage", channel=CHANNEL, username="The Force",
+            text="I sense a disturbance in the force")
         while True:
             messages = sc.rtm_read()
             for message in messages:
-                print("Message: %s" % message)
+                #print("Message: %s" % message)
                 if is_hogwarts_related(message):
-                    print('is_hogwarts_related')
+                    #print('is_hogwarts_related')
                     for m in p.award_points(message['text'], message['user']):
                         sc.api_call(
                             "chat.postMessage", channel=CHANNEL,
-                            username="Hogwarts bot", text=m)
+                            username="The Force", text=m)
                     os.system(
                         "curl -F file=@%s -F title=%s -F channels=%s -F token=%s https://slack.com/api/files.upload"
                          % (cup_image.image_for_scores(p.points), '"House Points"', CHANNEL, SLACK_TOKEN))
